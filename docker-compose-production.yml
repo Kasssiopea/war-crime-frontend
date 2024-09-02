@@ -1,0 +1,25 @@
+version: "3.9"
+
+networks:
+  wc:
+    name: br0
+    external: true
+services:
+  vuejs-service:
+    image: ${APPLICATION_IMAGE_PRODUCTION}
+    networks:
+      - wc
+    # command: sh command
+    # env_file:
+    #   - .env.production
+    ports:
+      - 8002:80
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.route-${CI_PROJECT_NAME}-1.rule=Host(${PUBLIC_URL_PRODUCTION}) && PathPrefix(`$BASE_URL`)"
+      - "traefik.http.routers.route-${CI_PROJECT_NAME}-1.priority=10"
+      - "traefik.http.routers.route-${CI_PROJECT_NAME}-1.middlewares=ratelimit-${CI_PROJECT_NAME}-1"
+      - "traefik.http.middlewares.ratelimit-${CI_PROJECT_NAME}-1.ratelimit.average=100"
+      - "traefik.http.middlewares.ratelimit-${CI_PROJECT_NAME}-1.ratelimit.burst=100"
+      - "traefik.http.middlewares.ratelimit-${CI_PROJECT_NAME}-1.ratelimit.period=1"
